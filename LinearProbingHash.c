@@ -44,8 +44,7 @@ int prime()
         }
         if(i >= sqrt(new_prime))
         {
-                size = new_prime;
-                found = true;
+             found = true;
         }
     }
     return new_prime;
@@ -87,14 +86,15 @@ int linear_probing_hash(LinearProbing* table, int key) {
 //zmena velkosti tabulky
 LinearProbing* linear_probing_resize(LinearProbing* table, int size) {
     LinearProbing* new_table = linear_probing_init(size);
+    
     int i;
     for (i = 0; i < table->size; i++) {
         if (table->values[i]) {
-            int new_index = linear_probing_hash(new_table, table->values[i]) % size;
-            new_table->values[new_index] = table->values[i];
+            linear_probing_set(new_table, table->values[i]);
         }
     }
     printf("Zmena velkosti tabulky z %d na %d\n", table->size, size);
+    
     linear_probing_free(table);
 
     return new_table;
@@ -113,11 +113,11 @@ int linear_probing_set(LinearProbing* table, int value) {
             table->values[index] = value;
             count++;
             //printf("vlozene %d na %d\n", value, index);
-            if (load > limit)
+            if (load > limit && table == tabulka)
             {
                 printf("extension\n");
-                tabulka = linear_probing_resize(tabulka, prime());
-                size = tabulka->size;
+                size = prime();
+                tabulka = linear_probing_resize(tabulka, size);
             }
             return returnVal;
         }
@@ -181,13 +181,17 @@ int main() {
     //inicializacia tabulky
     tabulka = linear_probing_init(size);
     //vkladanie
-    for (int i = 1; i < 1000; i++)
+    for (int i = 1; i < 100000; i++)
     {
         linear_probing_set(tabulka, i);
-        printf("%d\n", i);
+        //printf("%d\n", i);
     }
     //hladanie
-    linear_probing_get(tabulka, 10);
+    for (int i = 1; i < 100000; i++)
+    {
+        if(linear_probing_get(tabulka, i) == -1) printf("nenasiel som %d\n",i);
+        //printf("%d\n", i);
+    }
 
     return 0;
 }
