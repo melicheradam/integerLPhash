@@ -2,9 +2,9 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
-#include <Windows.h>
 #include <time.h>
-#include "../Testovac/helper.h"
+#include <stdbool.h>
+#include <math.h>
 
 /////////////////////////////////////////////////////////
 //PREVZATA & UPRAVENA IMPLEMENTACIA LINEAR PROBING HASH//
@@ -14,12 +14,42 @@
 //////////TO SAMOTNA VALUE KTORU VKLADAM.////////////////
 /////////////////////////////////////////////////////////
 
+#define load count/size
 
+
+const double limit = 0.5;
+int size = 11;
+double count = 0;
 
 typedef struct {
     int* values;
     int size;
 } LinearProbing;
+
+LinearProbing *tabulka;
+
+int prime()
+{
+    int new_prime = 2 * size, i;
+    bool found = false;
+    while (found != true)
+    {
+        for( i = 2; i < sqrt(new_prime); i++)
+        {
+                if(new_prime % i == 0)
+                {
+                    new_prime++;
+                    break;
+                }
+        }
+        if(i >= sqrt(new_prime))
+        {
+                size = new_prime;
+                found = true;
+        }
+    }
+    return new_prime;
+}
 
 //inicializacia tabulky
 LinearProbing* linear_probing_init(int size) {
@@ -41,8 +71,8 @@ int linear_probing_hash(LinearProbing* table, int key) {
     unsigned int hash = 0;
     unsigned int x = 0;
     unsigned int i = 0;
-    //uprava z table->size na 7, pretoûe inak to hashovanie trvalo neskutoËne dlho..
-    //a t˝m myslÌm 50k prvkov aj 2 minuty
+    //uprava z table->size na 7, preto≈æe inak to hashovanie trvalo neskuto√®ne dlho..
+    //a t√Ωm mysl√≠m 50k prvkov aj 2 minuty
     for (i = 0; i < 7; i++) {
         hash = (hash << 4) + key;
         if ((x = hash & 0xF0000000L) != 0)
@@ -66,7 +96,7 @@ LinearProbing* linear_probing_resize(LinearProbing* table, int size) {
     }
     printf("Zmena velkosti tabulky z %d na %d\n", table->size, size);
     linear_probing_free(table);
-    
+
     return new_table;
 }
 
@@ -75,12 +105,20 @@ int linear_probing_set(LinearProbing* table, int value) {
     int start = linear_probing_hash(table, value) % table->size;
     int index = start;
     int returnVal = 0;
-    
+
     //iterujem tabulkou kym sa nevratim na zaciatok
     while (1) {
-        if (table->values[index] == 0) {
+        if (table->values[index] == 0)
+        {
             table->values[index] = value;
+            count++;
             //printf("vlozene %d na %d\n", value, index);
+            if (load > limit)
+            {
+                printf("extension\n");
+                tabulka = linear_probing_resize(table, prime());
+                size = table->size;
+            }
             return returnVal;
         }
         //ignorujem rovnake hodnoty
@@ -96,6 +134,7 @@ int linear_probing_set(LinearProbing* table, int value) {
         }
     }
     return -1;
+
 }
 
 int linear_probing_get(LinearProbing* table, int value) {
@@ -139,19 +178,16 @@ void linear_probing_print(LinearProbing* table) {
 
 
 int main() {
-    LinearProbing *tabulka;
     //inicializacia tabulky
-    tabulka = linear_pribing_init(500);
+    tabulka = linear_probing_init(size);
     //vkladanie
-    linear_probing_set(tabulka, 10);
+    for (int i = 1; i < 1000; i++)
+    {
+        linear_probing_set(tabulka, i);
+        printf("%d\n", i);
+    }
     //hladanie
     linear_probing_get(tabulka, 10);
-    //resize tabulky
-    tabulka = linear_probing_resize(tabulka,1000);
 
-   
     return 0;
 }
-
-
-
