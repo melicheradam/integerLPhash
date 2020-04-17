@@ -116,8 +116,8 @@ int linear_probing_set(LinearProbing* table, int value) {
             if (load > limit)
             {
                 printf("extension\n");
-                tabulka = linear_probing_resize(table, prime());
-                size = table->size;
+                tabulka = linear_probing_resize(tabulka, prime());
+                size = tabulka->size;
             }
             return returnVal;
         }
