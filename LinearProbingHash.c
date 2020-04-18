@@ -111,7 +111,8 @@ int linear_probing_set(LinearProbing* table, int value) {
         if (table->values[index] == 0)
         {
             table->values[index] = value;
-            count++;
+            if(table == tabulka)
+                count++;
             //printf("vlozene %d na %d\n", value, index);
             if (load > limit && table == tabulka)
             {
